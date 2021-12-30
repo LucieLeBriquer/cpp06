@@ -1,4 +1,6 @@
 .vscode/**
 **/*.out
 **/*.o
-
+ex00/convert
+notes.md
+test/**
