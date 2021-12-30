@@ -15,6 +15,10 @@
 # include <iostream>
 # include <cstdlib>
 # include <cerrno>
+# include <limits>
+# define FLOAT 0
+# define INT 1
+# define CHAR 2
 
 class Conversion
 {
@@ -31,9 +35,11 @@ class Conversion
 		std::string	_limit;
 		bool		_stringError;
 		bool		_outOfRange;
+		bool		_zeroDec;
 
 		Conversion(const Conversion &conversion);
 		bool		_isLimit(const char *value);
+		bool		_badFormat(const char *value);
 		
 	public:
 		Conversion(void);
