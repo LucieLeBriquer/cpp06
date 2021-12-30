@@ -6,7 +6,7 @@
 /*   By: lle-briq <lle-briq@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/30 09:48:32 by lle-briq          #+#    #+#             */
-/*   Updated: 2021/12/30 11:01:03 by lle-briq         ###   ########.fr       */
+/*   Updated: 2021/12/31 00:32:33 by lle-briq         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,67 +19,31 @@
 Conversion::Conversion(void) :
 	_charConvOk(false), _intConvOk(false), _floatConvOk(false), _doubleConvOk(false),
 	_charValue(0), _intValue(0), _floatValue(0.0f), _doubleValue(0.0f),
-	_isLimitBool(false), _limit(""), _stringError(false), _outOfRange(false),
-	_zeroDec(true)
+	_isLimitBool(false), _limit(""), _stringError(false), _zeroDec(true)
 {
 	return ;
-}
-
-static bool	isOutOfRange(double value, int type)
-{
-	if (type == FLOAT)
-		return (value < -std::numeric_limits<float>::max() || value > std::numeric_limits<float>::max());
-	if (type == INT)
-		return (value < std::numeric_limits<int>::min() || value > std::numeric_limits<int>::max());
-	else
-		return (value < std::numeric_limits<char>::min() || value > std::numeric_limits<char>::max());
 }
 
 Conversion::Conversion(const char *value) : 
 	_charConvOk(false), _intConvOk(false), _floatConvOk(false), _doubleConvOk(false),
 	_charValue(0), _intValue(0), _floatValue(0.0f), _doubleValue(0.0f),
-	_isLimitBool(false), _limit(""), _stringError(false), _outOfRange(false),
-	_zeroDec(true)
+	_isLimitBool(false), _limit(""), _stringError(false), _zeroDec(true)
 {
-	char	*end;
-	bool	isChar;
+	int		type;
 
 	if (_isLimit(value))
 		return ;
-	isChar = (value[0] && !value[1]);
-	if (!isChar)
-	{
-		_doubleValue = strtod(value, &end);
-		if (errno == ERANGE)
-		{
-			_outOfRange = true;
-			return ;
-		}
-		if (value == end || _badFormat(value))
-		{
-			_stringError = true;
-			return ;
-		}
-	}
+	type = _getType(value);
+	if (type == CHAR)
+		_convFromChar(value);
+	else if (type == INT)
+		_convFromInt(value);
+	else if (type == FLOAT)
+		_convFromFloat(value);
+	else if (type == DOUBLE)
+		_convFromDouble(value);
 	else
-		_doubleValue = static_cast<double>(value[0]);
-	_doubleConvOk = true;
-	if (!isOutOfRange(_doubleValue, FLOAT))
-	{
-		_floatValue = static_cast<float>(_doubleValue);
-		_floatConvOk = true;
-	}
-	if (!isOutOfRange(_doubleValue, INT))
-	{
-		_intValue = static_cast<int>(_doubleValue);
-		_intConvOk = true;
-	}
-	if (!isOutOfRange(_doubleValue, CHAR))
-	{
-		_charValue = static_cast<char>(_doubleValue);
-		_charConvOk = true;
-	}
-
+		_stringError = true;
 }
 
 Conversion::Conversion(const Conversion &conversion)
@@ -98,17 +62,7 @@ Conversion::~Conversion()
 
 Conversion	&Conversion::operator=(const Conversion &conversion)
 {
-	if (this != &conversion)
-	{
-		_charConvOk = conversion._charConvOk;
-		_intConvOk = conversion._intConvOk;
-		_floatConvOk = conversion._floatConvOk;
-		_doubleConvOk = conversion._doubleConvOk;
-		_charValue = conversion._charValue;
-		_intValue = conversion._intValue;
-		_floatValue = conversion._floatValue;
-		_doubleConvOk = conversion._doubleConvOk;
-	}
+	(void)conversion;
 	return (*this);
 }
 
@@ -224,28 +178,147 @@ bool	Conversion::getStringError(void) const
 	return (_stringError);
 }
 
-bool	Conversion::_badFormat(const char *value)
+int	Conversion::_getType(const char *value)
 {
-	int	i;
+	int		i;
+	bool	isInteger = true;
+	bool	isFloat = false;
 
 	i = 0;
+	if (value[0] && value[1] == '\0')
+		return (CHAR);
 	if (value[i] == '-' || value[i] == '+')
 		i++;
 	while (value[i] && value[i] >= '0' && value[i] <= '9')
 		i++;
 	if (value[i] == '.')
-		i++;
-	while (value[i] && value[i] >= '0' && value[i] <= '9')
 	{
-		if (value[i] != '0')
-			_zeroDec = false;
+		isInteger = false;
+		i++;
+		while (value[i] && value[i] >= '0' && value[i] <= '9')
+		{
+			if (value[i] != '0')
+				_zeroDec = false;
+			i++;
+		}
+	}
+	if (value[i] == 'f')
+	{
+		isFloat = true;
 		i++;
 	}
-	if (value[i] == 'e' && value[i + 1] && value[i + 1] == '+')
-		i += 2;
-	while (value[i] && value[i] >= '0' && value[i] <= '9')
-		i++;
-	if (value[i] == 'f')
-		i++;
-	return (value[i] != '\0');
+	if (value[i])
+		return (WRONG);
+	if (isFloat)
+		return (FLOAT);
+	if (isInteger)
+		return (INT);
+	return (DOUBLE);
+}
+
+static bool	isOutOfRange(double value, int type)
+{
+	if (type == FLOAT)
+		return (value < -std::numeric_limits<float>::max() || value > std::numeric_limits<float>::max());
+	if (type == INT)
+		return (value < std::numeric_limits<int>::min() || value > std::numeric_limits<int>::max());
+	else
+		return (value < std::numeric_limits<char>::min() || value > std::numeric_limits<char>::max());
+}
+
+void	Conversion::_convFromChar(const char *value)
+{
+	_charValue = value[0];
+	_charConvOk = true;
+	_intValue = static_cast<int>(_charValue);
+	_intConvOk = true;
+	_floatValue = static_cast<float>(_charValue);
+	_floatConvOk = true;
+	_doubleValue = static_cast<double>(_charValue);
+	_doubleConvOk = true;
+}
+
+void	Conversion::_convFromInt(const char *value)
+{
+	if (strcmp(value, "2147483647") > 0
+		|| (value[0] == '-' && strcmp(value + 1, "2147483648") > 0)
+		|| (value[0] == '+' && strcmp(value + 1, "2147483647") > 0))
+	{
+		_outOfRange = true;
+		return ;
+	}
+	_intValue = atoi(value);
+	_intConvOk = true;
+	_floatValue = static_cast<float>(_intValue);
+	_floatConvOk = true;
+	_doubleValue = static_cast<double>(_intValue);
+	_doubleConvOk = true;
+	if (!isOutOfRange(_doubleValue, CHAR))
+	{
+		_charValue = static_cast<char>(_intValue);
+		_charConvOk = true;
+	}
+}
+
+void	Conversion::_convFromFloat(const char *value)
+{
+	char	*end = NULL;
+
+	_floatValue =  std::strtof(value, &end);
+	if (value == end)
+	{
+		_stringError = true;
+		return ;
+	}
+	if (errno == ERANGE)
+	{
+		_outOfRange = true;
+		return ;
+	}
+	_floatConvOk = true;
+	_doubleValue = static_cast<double>(_floatValue);
+	_doubleConvOk = true;
+	if (!isOutOfRange(_doubleValue, INT))
+	{
+		_intValue = static_cast<int>(_floatValue);
+		_intConvOk = true;
+	}
+	if (!isOutOfRange(_doubleValue, CHAR))
+	{
+		_charValue = static_cast<char>(_floatValue);
+		_charConvOk = true;
+	}
+}
+
+void	Conversion::_convFromDouble(const char *value)
+{
+	char	*end;
+
+	_doubleValue = std::strtod(value, &end);
+	if (value == end)
+	{
+		_stringError = true;
+		return ;
+	}
+	if (errno == ERANGE)
+	{
+		_outOfRange = true;
+		return ;
+	}
+	_doubleConvOk = true;
+	if (!isOutOfRange(_doubleValue, FLOAT))
+	{
+		_floatValue =  static_cast<float>(_doubleValue);
+		_floatConvOk = true;
+	}
+	if (!isOutOfRange(_doubleValue, INT))
+	{
+		_intValue = static_cast<int>(_floatValue);
+		_intConvOk = true;
+	}
+	if (!isOutOfRange(_doubleValue, CHAR))
+	{
+		_charValue = static_cast<char>(_floatValue);
+		_charConvOk = true;
+	}
 }

@@ -6,7 +6,7 @@
 /*   By: lle-briq <lle-briq@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/30 09:23:44 by lle-briq          #+#    #+#             */
-/*   Updated: 2021/12/30 10:14:16 by lle-briq         ###   ########.fr       */
+/*   Updated: 2021/12/30 23:31:34 by lle-briq         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,9 +16,12 @@
 # include <cstdlib>
 # include <cerrno>
 # include <limits>
-# define FLOAT 0
+# include <cstring>
+# define CHAR 0
 # define INT 1
-# define CHAR 2
+# define FLOAT 2
+# define DOUBLE 3
+# define WRONG 4
 
 class Conversion
 {
@@ -38,15 +41,19 @@ class Conversion
 		bool		_zeroDec;
 
 		Conversion(const Conversion &conversion);
+		Conversion	&operator=(const Conversion &conversion);
+
 		bool		_isLimit(const char *value);
-		bool		_badFormat(const char *value);
-		
+		int			_getType(const char *value);
+		void		_convFromChar(const char *value);
+		void		_convFromInt(const char *value);
+		void		_convFromFloat(const char *value);
+		void		_convFromDouble(const char *value);
+
 	public:
 		Conversion(void);
 		Conversion(const char *value);
 		virtual ~Conversion();
-
-		Conversion	&operator=(const Conversion &conversion);
 
 		void		printChar(void) const;
 		void		printInt(void) const;
