@@ -6,7 +6,7 @@
 /*   By: lle-briq <lle-briq@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/30 09:48:32 by lle-briq          #+#    #+#             */
-/*   Updated: 2021/12/31 01:10:19 by lle-briq         ###   ########.fr       */
+/*   Updated: 2021/12/31 01:15:54 by lle-briq         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,15 +64,15 @@ Conversion	&Conversion::operator=(const Conversion &conversion)
 std::ostream	&operator<<(std::ostream &o, const Conversion &conversion)
 {
 	if (conversion.getOutOfRange())
-		std::cerr << "Error: values out of range" << std::endl;
+		o << "Error: values out of range" << std::endl;
 	else if (conversion.getStringError())
-		std::cerr << "Error: string format error" << std::endl;
+		o << "Error: string format error" << std::endl;
 	else
 	{
-		conversion.printChar();
-		conversion.printInt();
-		conversion.printFloat();
-		conversion.printDouble();
+		conversion.printChar(o);
+		conversion.printInt(o);
+		conversion.printFloat(o);
+		conversion.printDouble(o);
 	}
 	return (o);
 };
@@ -81,66 +81,66 @@ std::ostream	&operator<<(std::ostream &o, const Conversion &conversion)
 **		MEMBER FUNCTIONS
 */
 
-void	Conversion::printChar(void) const
+void	Conversion::printChar(std::ostream &o) const
 {
-	std::cout << "char: ";
+	o << "char: ";
 	if (!_charConvOk)
 	{
-		std::cout << "impossible" << std::endl;
+		o << "impossible" << std::endl;
 		return ;
 	}
 	if (_charValue > 31 && _charValue < 127)
-		std::cout << "'" << _charValue << "'" << std::endl;
+		o << "'" << _charValue << "'" << std::endl;
 	else
-		std::cout << "non displayable" << std::endl;
+		o << "non displayable" << std::endl;
 }
 
-void	Conversion::printInt(void) const
+void	Conversion::printInt(std::ostream &o) const
 {
-	std::cout << "int: ";
+	o << "int: ";
 	if (!_intConvOk)
 	{
-		std::cout << "impossible" << std::endl;
+		o << "impossible" << std::endl;
 		return ;
 	}
-	std::cout << _intValue << std::endl;
+	o << _intValue << std::endl;
 }
 
-void	Conversion::printFloat(void) const
+void	Conversion::printFloat(std::ostream &o) const
 {
-	std::cout << "float: ";
+	o << "float: ";
 	if (!_floatConvOk)
 	{
-		std::cout << "impossible" << std::endl;
+		o << "impossible" << std::endl;
 		return ;
 	}
 	if (_isLimitBool)
-		std::cout << _limit + "f" << std::endl;
+		o << _limit + "f" << std::endl;
 	else
 	{
-		std::cout << _floatValue;
+		o << _floatValue;
 		if (_zeroDec)
-			std::cout << ".0";
-		std::cout << "f" << std::endl;
+			o << ".0";
+		o << "f" << std::endl;
 	}
 }
 
-void	Conversion::printDouble(void) const
+void	Conversion::printDouble(std::ostream &o) const
 {
-	std::cout << "double: ";
+	o << "double: ";
 	if (!_doubleConvOk)
 	{
-		std::cout << "impossible" << std::endl;
+		o << "impossible" << std::endl;
 		return ;
 	}
 	if (_isLimitBool)
-		std::cout << _limit << std::endl;
+		o << _limit << std::endl;
 	else
 	{
-		std::cout << _doubleValue;
+		o << _doubleValue;
 		if (_zeroDec)
-			std::cout << ".0";
-		std::cout << std::endl;
+			o << ".0";
+		o << std::endl;
 	}
 }
 

@@ -50,10 +50,10 @@ class Conversion
 		Conversion(const char *value);
 		virtual ~Conversion();
 
-		void		printChar(void) const;
-		void		printInt(void) const;
-		void		printFloat(void) const;
-		void		printDouble(void) const;
+		void		printChar(std::ostream &o) const;
+		void		printInt(std::ostream &o) const;
+		void		printFloat(std::ostream &o) const;
+		void		printDouble(std::ostream &o) const;
 		bool		getOutOfRange(void) const;
 		bool		getStringError(void) const;
 
