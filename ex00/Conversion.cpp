@@ -6,7 +6,7 @@
 /*   By: lle-briq <lle-briq@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/30 09:48:32 by lle-briq          #+#    #+#             */
-/*   Updated: 2021/12/31 00:32:33 by lle-briq         ###   ########.fr       */
+/*   Updated: 2021/12/31 01:10:19 by lle-briq         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,21 +29,16 @@ Conversion::Conversion(const char *value) :
 	_charValue(0), _intValue(0), _floatValue(0.0f), _doubleValue(0.0f),
 	_isLimitBool(false), _limit(""), _stringError(false), _zeroDec(true)
 {
-	int		type;
-
+	int				type;
+	convFunction	conversions[4] = {&Conversion::_convFromChar, &Conversion::_convFromInt,
+									&Conversion::_convFromFloat, &Conversion::_convFromDouble};
 	if (_isLimit(value))
 		return ;
 	type = _getType(value);
-	if (type == CHAR)
-		_convFromChar(value);
-	else if (type == INT)
-		_convFromInt(value);
-	else if (type == FLOAT)
-		_convFromFloat(value);
-	else if (type == DOUBLE)
-		_convFromDouble(value);
-	else
+	if (type == Conversion::wrongType)
 		_stringError = true;
+	else
+		(this->*(conversions[type]))(value);
 }
 
 Conversion::Conversion(const Conversion &conversion)
@@ -186,7 +181,7 @@ int	Conversion::_getType(const char *value)
 
 	i = 0;
 	if (value[0] && value[1] == '\0')
-		return (CHAR);
+		return (Conversion::charType);
 	if (value[i] == '-' || value[i] == '+')
 		i++;
 	while (value[i] && value[i] >= '0' && value[i] <= '9')
@@ -208,22 +203,23 @@ int	Conversion::_getType(const char *value)
 		i++;
 	}
 	if (value[i])
-		return (WRONG);
+		return (Conversion::wrongType);
 	if (isFloat)
-		return (FLOAT);
+		return (Conversion::floatType);
 	if (isInteger)
-		return (INT);
-	return (DOUBLE);
+		return (Conversion::intType);
+	return (Conversion::doubleType);
 }
 
 static bool	isOutOfRange(double value, int type)
 {
-	if (type == FLOAT)
+	if (type == Conversion::floatType)
 		return (value < -std::numeric_limits<float>::max() || value > std::numeric_limits<float>::max());
-	if (type == INT)
+	if (type == Conversion::intType)
 		return (value < std::numeric_limits<int>::min() || value > std::numeric_limits<int>::max());
-	else
+	if (type == Conversion::charType)
 		return (value < std::numeric_limits<char>::min() || value > std::numeric_limits<char>::max());
+	return (true);
 }
 
 void	Conversion::_convFromChar(const char *value)
@@ -240,9 +236,9 @@ void	Conversion::_convFromChar(const char *value)
 
 void	Conversion::_convFromInt(const char *value)
 {
-	if (strcmp(value, "2147483647") > 0
-		|| (value[0] == '-' && strcmp(value + 1, "2147483648") > 0)
-		|| (value[0] == '+' && strcmp(value + 1, "2147483647") > 0))
+	if ((strlen(value) == 10 && strcmp(value, "2147483647") > 0)
+		|| (value[0] == '-' && strlen(value) == 11 && strcmp(value + 1, "2147483648") > 0)
+		|| (value[0] == '+' && strlen(value) == 11 && strcmp(value + 1, "2147483647") > 0))
 	{
 		_outOfRange = true;
 		return ;
@@ -253,7 +249,7 @@ void	Conversion::_convFromInt(const char *value)
 	_floatConvOk = true;
 	_doubleValue = static_cast<double>(_intValue);
 	_doubleConvOk = true;
-	if (!isOutOfRange(_doubleValue, CHAR))
+	if (!isOutOfRange(_doubleValue, Conversion::charType))
 	{
 		_charValue = static_cast<char>(_intValue);
 		_charConvOk = true;
@@ -278,12 +274,12 @@ void	Conversion::_convFromFloat(const char *value)
 	_floatConvOk = true;
 	_doubleValue = static_cast<double>(_floatValue);
 	_doubleConvOk = true;
-	if (!isOutOfRange(_doubleValue, INT))
+	if (!isOutOfRange(_doubleValue, Conversion::intType))
 	{
 		_intValue = static_cast<int>(_floatValue);
 		_intConvOk = true;
 	}
-	if (!isOutOfRange(_doubleValue, CHAR))
+	if (!isOutOfRange(_doubleValue, Conversion::charType))
 	{
 		_charValue = static_cast<char>(_floatValue);
 		_charConvOk = true;
@@ -306,17 +302,17 @@ void	Conversion::_convFromDouble(const char *value)
 		return ;
 	}
 	_doubleConvOk = true;
-	if (!isOutOfRange(_doubleValue, FLOAT))
+	if (!isOutOfRange(_doubleValue, Conversion::floatType))
 	{
 		_floatValue =  static_cast<float>(_doubleValue);
 		_floatConvOk = true;
 	}
-	if (!isOutOfRange(_doubleValue, INT))
+	if (!isOutOfRange(_doubleValue, Conversion::intType))
 	{
 		_intValue = static_cast<int>(_floatValue);
 		_intConvOk = true;
 	}
-	if (!isOutOfRange(_doubleValue, CHAR))
+	if (!isOutOfRange(_doubleValue, Conversion::charType))
 	{
 		_charValue = static_cast<char>(_floatValue);
 		_charConvOk = true;
