@@ -25,35 +25,38 @@ class Conversion
 		bool		_intConvOk;
 		bool		_floatConvOk;
 		bool		_doubleConvOk;
+
 		char		_charValue;
 		int			_intValue;
 		float		_floatValue;
 		double		_doubleValue;
+
 		int			_isLimitBool;
 		std::string	_limit;
 		bool		_stringError;
 		bool		_outOfRange;
 		bool		_zeroDec;
 
+		Conversion(void);
 		Conversion(const Conversion &conversion);
 		Conversion	&operator=(const Conversion &conversion);
 
 		bool		_isLimit(const char *value);
 		int			_getType(const char *value);
+
 		void		_convFromChar(const char *value);
 		void		_convFromInt(const char *value);
 		void		_convFromFloat(const char *value);
 		void		_convFromDouble(const char *value);
 
 	public:
-		Conversion(void);
 		Conversion(const char *value);
 		virtual ~Conversion();
 
-		void		printChar(std::ostream &o) const;
-		void		printInt(std::ostream &o) const;
-		void		printFloat(std::ostream &o) const;
-		void		printDouble(std::ostream &o) const;
+		void		printChar(std::ostream &o = std::cout) const;
+		void		printInt(std::ostream &o = std::cout) const;
+		void		printFloat(std::ostream &o = std::cout) const;
+		void		printDouble(std::ostream &o = std::cout) const;
 		bool		getOutOfRange(void) const;
 		bool		getStringError(void) const;
 
