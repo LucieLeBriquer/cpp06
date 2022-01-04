@@ -6,11 +6,53 @@
 /*   By: lle-briq <lle-briq@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/30 09:48:32 by lle-briq          #+#    #+#             */
-/*   Updated: 2022/01/04 16:04:38 by lle-briq         ###   ########.fr       */
+/*   Updated: 2022/01/04 17:01:56 by lle-briq         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Conversion.hpp"
+
+/*
+**		UTILS
+*/
+
+static int	getPrecision(double value, bool *needZero, unsigned int n = 5)
+{
+	double			limitFloating;
+	double			floatPart;
+	unsigned int	intPart, j;
+	int				sign;
+
+	sign = 1;
+	if (value < 0)
+		sign = -1;
+	intPart = static_cast<unsigned int>(sign * value);
+	floatPart = sign * value - intPart;
+	j = 0;
+	while (intPart > 0)
+	{
+		intPart = intPart / 10;
+		j++;
+	}
+	limitFloating = 0.5;
+	while (++j < n)
+		limitFloating = limitFloating / 10;
+	*needZero = false;
+	if (limitFloating < 0.1 && floatPart <= limitFloating)
+		*needZero = true;
+	return (n);
+}
+
+static bool	isOutOfRange(double value, int type)
+{
+	if (type == Conversion::floatType)
+		return (value < -std::numeric_limits<float>::max() || value > std::numeric_limits<float>::max());
+	if (type == Conversion::intType)
+		return (value < std::numeric_limits<int>::min() || value > std::numeric_limits<int>::max());
+	if (type == Conversion::charType)
+		return (value < 0 || value > std::numeric_limits<char>::max());
+	return (true);
+}
 
 /*
 **		CONSTRUCTORS AND DESTRUCTOR
@@ -19,7 +61,7 @@
 Conversion::Conversion(void) :
 	_charConvOk(false), _intConvOk(false), _floatConvOk(false), _doubleConvOk(false),
 	_charValue(0), _intValue(0), _floatValue(0.0f), _doubleValue(0.0f),
-	_isLimitBool(false), _limit(""), _stringError(false), _zeroDec(true)
+	_isLimitBool(false), _limit(""), _stringError(false)
 {
 	return ;
 }
@@ -27,11 +69,12 @@ Conversion::Conversion(void) :
 Conversion::Conversion(const char *value) : 
 	_charConvOk(false), _intConvOk(false), _floatConvOk(false), _doubleConvOk(false),
 	_charValue(0), _intValue(0), _floatValue(0.0f), _doubleValue(0.0f),
-	_isLimitBool(false), _limit(""), _stringError(false), _zeroDec(true)
+	_isLimitBool(false), _limit(""), _stringError(false)
 {
 	int				type;
 	convFunction	conversions[4] = {&Conversion::_convFromChar, &Conversion::_convFromInt,
 									&Conversion::_convFromFloat, &Conversion::_convFromDouble};
+
 	if (_isLimit(value))
 		return ;
 	type = _getType(value);
@@ -106,31 +149,6 @@ void	Conversion::printInt(std::ostream &o) const
 	o << _intValue << std::endl;
 }
 
-static int	getPrecision(double value, bool *needZero, int n = 3)
-{
-	double	limitFloating;
-	double	floatPart;
-	int		intPart;
-	int		j, i;
-
-	intPart = static_cast<int>(value);
-	floatPart = value - intPart;
-	j = 0;
-	while (intPart > 0)
-	{
-		intPart = intPart / 10;
-		j++;
-	}
-	limitFloating = 0.5;
-	i = -1;
-	while (++i < n)
-		limitFloating = limitFloating / 10;
-	*needZero = false;
-	if (floatPart <= limitFloating)
-		*needZero = true;
-	return (j + n);
-}
-
 void	Conversion::printFloat(std::ostream &o) const
 {
 	bool	needZero;
@@ -186,6 +204,8 @@ bool	Conversion::_isLimit(const char *value)
 		{
 			_isLimitBool = true;
 			_limit = limits[i];
+			if (i == 1)
+				_limit = limits[0];
 			_floatConvOk = true;
 			_doubleConvOk = true;
 			return (true);
@@ -209,22 +229,25 @@ int	Conversion::_getType(const char *value)
 	int		i;
 	bool	isInteger = true;
 	bool	isFloat = false;
+	bool	noNumeric = true;
 
 	i = 0;
-	if (value[0] && value[1] == '\0')
+	if (value[0] && value[1] == '\0' && (value[i] < '0' || value[i] > '9'))
 		return (Conversion::charType);
 	if (value[i] == '-' || value[i] == '+')
 		i++;
 	while (value[i] && value[i] >= '0' && value[i] <= '9')
+	{
 		i++;
+		noNumeric = false;
+	}
 	if (value[i] == '.')
 	{
 		isInteger = false;
 		i++;
 		while (value[i] && value[i] >= '0' && value[i] <= '9')
 		{
-			if (value[i] != '0')
-				_zeroDec = false;
+			noNumeric = false;
 			i++;
 		}
 	}
@@ -233,24 +256,13 @@ int	Conversion::_getType(const char *value)
 		isFloat = true;
 		i++;
 	}
-	if (value[i])
+	if (value[i] || noNumeric || (isFloat && isInteger))
 		return (Conversion::wrongType);
 	if (isFloat)
 		return (Conversion::floatType);
 	if (isInteger)
 		return (Conversion::intType);
 	return (Conversion::doubleType);
-}
-
-static bool	isOutOfRange(double value, int type)
-{
-	if (type == Conversion::floatType)
-		return (value < -std::numeric_limits<float>::max() || value > std::numeric_limits<float>::max());
-	if (type == Conversion::intType)
-		return (value < std::numeric_limits<int>::min() || value > std::numeric_limits<int>::max());
-	if (type == Conversion::charType)
-		return (value < std::numeric_limits<char>::min() || value > std::numeric_limits<char>::max());
-	return (true);
 }
 
 void	Conversion::_convFromChar(const char *value)

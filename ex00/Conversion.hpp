@@ -6,7 +6,7 @@
 /*   By: lle-briq <lle-briq@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/30 09:23:44 by lle-briq          #+#    #+#             */
-/*   Updated: 2021/12/31 01:10:55 by lle-briq         ###   ########.fr       */
+/*   Updated: 2022/01/04 17:01:59 by lle-briq         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,7 +35,6 @@ class Conversion
 		std::string	_limit;
 		bool		_stringError;
 		bool		_outOfRange;
-		bool		_zeroDec;
 
 		Conversion(void);
 		Conversion(const Conversion &conversion);
