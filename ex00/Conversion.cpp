@@ -16,33 +16,6 @@
 **		UTILS
 */
 
-static int	getPrecision(double value, bool *needZero, unsigned int n = 5)
-{
-	double			limitFloating;
-	double			floatPart;
-	unsigned int	intPart, j;
-	int				sign;
-
-	sign = 1;
-	if (value < 0)
-		sign = -1;
-	intPart = static_cast<unsigned int>(sign * value);
-	floatPart = sign * value - intPart;
-	j = 0;
-	while (intPart > 0)
-	{
-		intPart = intPart / 10;
-		j++;
-	}
-	limitFloating = 0.5;
-	while (++j < n)
-		limitFloating = limitFloating / 10;
-	*needZero = false;
-	if (limitFloating < 0.1 && floatPart <= limitFloating)
-		*needZero = true;
-	return (n);
-}
-
 static bool	isOutOfRange(double value, int type)
 {
 	if (type == Conversion::floatType)
@@ -151,8 +124,6 @@ void	Conversion::printInt(std::ostream &o) const
 
 void	Conversion::printFloat(std::ostream &o) const
 {
-	bool	needZero;
-
 	o << "float: ";
 	if (!_floatConvOk)
 	{
@@ -163,18 +134,13 @@ void	Conversion::printFloat(std::ostream &o) const
 		o << _limit + "f" << std::endl;
 	else
 	{
-		std::cout.precision(getPrecision(_floatValue, &needZero));
-		o << _floatValue;
-		if (needZero)
-			o << ".0";
-		o << "f" << std::endl;
+		o.precision(1);
+		o << std::fixed << _floatValue << "f" << std::endl;
 	}
 }
 
 void	Conversion::printDouble(std::ostream &o) const
 {
-	bool	needZero;
-
 	o << "double: ";
 	if (!_doubleConvOk)
 	{
@@ -185,11 +151,8 @@ void	Conversion::printDouble(std::ostream &o) const
 		o << _limit << std::endl;
 	else
 	{
-		std::cout.precision(getPrecision(_doubleValue, &needZero));
-		o << _doubleValue;
-		if (needZero)
-			o << ".0";
-		o << std::endl;
+		o.precision(1);
+		o << std::fixed << _doubleValue << std::endl;
 	}
 }
 
