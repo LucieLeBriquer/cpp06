@@ -6,7 +6,7 @@
 /*   By: lle-briq <lle-briq@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/30 09:48:32 by lle-briq          #+#    #+#             */
-/*   Updated: 2021/12/31 01:15:54 by lle-briq         ###   ########.fr       */
+/*   Updated: 2022/01/04 16:04:38 by lle-briq         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -106,8 +106,35 @@ void	Conversion::printInt(std::ostream &o) const
 	o << _intValue << std::endl;
 }
 
+static int	getPrecision(double value, bool *needZero, int n = 3)
+{
+	double	limitFloating;
+	double	floatPart;
+	int		intPart;
+	int		j, i;
+
+	intPart = static_cast<int>(value);
+	floatPart = value - intPart;
+	j = 0;
+	while (intPart > 0)
+	{
+		intPart = intPart / 10;
+		j++;
+	}
+	limitFloating = 0.5;
+	i = -1;
+	while (++i < n)
+		limitFloating = limitFloating / 10;
+	*needZero = false;
+	if (floatPart <= limitFloating)
+		*needZero = true;
+	return (j + n);
+}
+
 void	Conversion::printFloat(std::ostream &o) const
 {
+	bool	needZero;
+
 	o << "float: ";
 	if (!_floatConvOk)
 	{
@@ -118,8 +145,9 @@ void	Conversion::printFloat(std::ostream &o) const
 		o << _limit + "f" << std::endl;
 	else
 	{
+		std::cout.precision(getPrecision(_floatValue, &needZero));
 		o << _floatValue;
-		if (_zeroDec)
+		if (needZero)
 			o << ".0";
 		o << "f" << std::endl;
 	}
@@ -127,6 +155,8 @@ void	Conversion::printFloat(std::ostream &o) const
 
 void	Conversion::printDouble(std::ostream &o) const
 {
+	bool	needZero;
+
 	o << "double: ";
 	if (!_doubleConvOk)
 	{
@@ -137,8 +167,9 @@ void	Conversion::printDouble(std::ostream &o) const
 		o << _limit << std::endl;
 	else
 	{
+		std::cout.precision(getPrecision(_doubleValue, &needZero));
 		o << _doubleValue;
-		if (_zeroDec)
+		if (needZero)
 			o << ".0";
 		o << std::endl;
 	}
