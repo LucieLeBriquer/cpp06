@@ -23,6 +23,18 @@ then
 	display_help
 fi
 
+
+## check if ./convert is here
+
+convert_ok=$(ls $CONVERT_PATH 2>/dev/null | wc -l)
+if [ "$convert_ok" -eq "0" ]
+then
+	printf "converter needed, please update CONVERT_PATH\n"
+	exit
+fi
+
+## test
+
 function test()
 {
 	printf "\n$YELLOW$CONVERT_PATH $1$NC\n"
