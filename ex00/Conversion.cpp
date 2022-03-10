@@ -6,7 +6,7 @@
 /*   By: lle-briq <lle-briq@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/30 09:48:32 by lle-briq          #+#    #+#             */
-/*   Updated: 2022/01/04 17:01:56 by lle-briq         ###   ########.fr       */
+/*   Updated: 2022/03/10 16:06:34 by lle-briq         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,7 +33,7 @@ static bool	isOutOfRange(double value, int type)
 
 Conversion::Conversion(void) :
 	_charConvOk(false), _intConvOk(false), _floatConvOk(false), _doubleConvOk(false),
-	_charValue(0), _intValue(0), _floatValue(0.0f), _doubleValue(0.0f),
+	_charValue(0), _intValue(0), _floatValue(0.0f), _doubleValue(0.0),
 	_isLimitBool(false), _limit(""), _stringError(false)
 {
 	return ;
@@ -41,7 +41,7 @@ Conversion::Conversion(void) :
 
 Conversion::Conversion(const char *value) : 
 	_charConvOk(false), _intConvOk(false), _floatConvOk(false), _doubleConvOk(false),
-	_charValue(0), _intValue(0), _floatValue(0.0f), _doubleValue(0.0f),
+	_charValue(0), _intValue(0), _floatValue(0.0f), _doubleValue(0.0),
 	_isLimitBool(false), _limit(""), _stringError(false)
 {
 	int				type;
